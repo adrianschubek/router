@@ -1,0 +1,29 @@
+{
+    "name": "adrianschubek/router",
+    "type": "library",
+    "description": "A routing library for PHP",
+    "keywords": [
+        "router",
+        "routing",
+        "request",
+        "response"
+    ],
+    "homepage": "https://router.adriansoftware.de",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Adrian Schubek",
+            "email": "adrian.schubek@gmail.com",
+            "homepage": "https://adriansoftware.de",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "adrianschubek\\": "src/"
+        }
+    }
+}
