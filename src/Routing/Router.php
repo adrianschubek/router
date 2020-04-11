@@ -6,11 +6,12 @@
 
 namespace adrianschubek\Routing;
 
+use Closure;
 
 class Router
 {
-    protected $routes = [];
-    protected $middlewareGroups = [];
+    protected array $routes = [];
+    protected array $middlewareGroups = [];
     protected $errorRoute;
 
     public function get(string $routePath, $controller)
@@ -80,7 +81,6 @@ class Router
         $found = false;
         $parameterMatches = [];
 
-        /** @var Route $route */
         foreach ($this->routes as $route) {
             if ($route->getMethod() !== $method || ($route->getRoute() === "\/" && $uri !== "/")) {
                 continue;
@@ -91,23 +91,18 @@ class Router
             }
         }
         array_shift($parameterMatches);
+
+        return var_dump([$method, $uri, $found, $parameterMatches]);
+
         if (!$found) {
             $this->call($this->errorRoute, $parameterMatches);
-
-            die("Not Found");
+//            die("Router: Not Found");
         } else {
-            $this->call($route->getController(), $parameterMatches);
-
-            die([$method, $uri, $this, $found, $parameterMatches]);
+//            $this->call($route->getController(), $parameterMatches);
+//            die(join(", ", [$method, $uri, $found, $parameterMatches]));
         }
-//                dd($method, $uri, $this, $found, $parameterMatches);
     }
 
-//    /**
-//     * @param $var
-//     * @param array $params
-//     * @return void
-//     */
 //    private function call($var, $params = [])
 //    {
 //        $paramArr = [];
@@ -115,16 +110,15 @@ class Router
 //            $paramArr[] = $val[0];
 //        }
 //        if ($var instanceof Closure) {
-//            Response::body($var(...$paramArr));
-//            App::send();
-//            return;
+//            return $var();
 //        }
-//        if (!is_string($var) || !str_contains($var, "@")) {
-//            throw new ControllerNotFound();
+//        if (!is_string($var) || !strpos($var, "@")) {
+////            throw new ControllerNotFound();
 //        }
 //        $ctrl = explode("@", $var);
-//        $response = call($ctrl, $params);
-//        dd($ctrl, $response);
+////        $response = call($ctrl, $params);
+////        dd($ctrl, $response);
+//        return [$var, $params];
 //    }
 
     public function route(string $name, array $values = [])
@@ -136,7 +130,7 @@ class Router
         return $url;
     }
 
-    public function error($callback)
+    public function error(callable $callback)
     {
         $this->errorRoute = $callback;
     }

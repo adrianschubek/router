@@ -9,13 +9,9 @@ namespace adrianschubek\Routing;
 
 class CachedRouter
 {
-    protected $router;
+    protected RouterInterface $router;
 
-    /**
-     * CachedRouter constructor.
-     * @param $router
-     */
-    public function __construct(Rout $router)
+    public function __construct(RouterInterface $router)
     {
         $this->router = $router;
     }

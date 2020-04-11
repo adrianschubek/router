@@ -10,31 +10,23 @@ namespace adrianschubek\Routing;
 class Route
 {
     public $name;
-    /**
-     * @var string
-     */
-    protected $method;
-    /**
-     * @var string
-     */
-    protected $route;
-    /**
-     * @var string
-     */
-    protected $stringRoute;
-    protected $controller;
+
+    protected string $method;
+    protected string $route;
+    protected string $stringRoute;
+    protected $callback;
     protected $middleware = [];
     protected $middlewareGroup = [];
 
-    public function __construct(string $method, string $route, $controller)
+    public function __construct(string $method, string $route, callable $controller)
     {
         $this->method = $method;
         $this->route = $this->regex($route);
         $this->stringRoute = $route;
-        $this->controller = $controller;
+        $this->callback = $controller;
     }
 
-    public function regex(string $route)
+    public function regex(string $route): string
     {
         $str = preg_quote($route, '/');
         $str = str_replace("\]", "]", $str);
@@ -42,18 +34,12 @@ class Route
         return preg_replace("/\[([a-z]+)]/", "([a-z0-9_-]+)", $str);
     }
 
-    /**
-     * @return string
-     */
     public function getStringRoute(): string
     {
         return $this->stringRoute;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -64,41 +50,26 @@ class Route
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getMethod(): string
     {
         return $this->method;
     }
 
-    /**
-     * @return string
-     */
     public function getRoute(): string
     {
         return $this->route;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getController()
+    public function getCallback(): callable
     {
-        return $this->controller;
+        return $this->callback;
     }
 
-    /**
-     * @return array
-     */
     public function getMiddleware(): array
     {
         return $this->middleware;
     }
 
-    /**
-     * @return array
-     */
     public function getMiddlewareGroup(): array
     {
         return $this->middlewareGroup;
