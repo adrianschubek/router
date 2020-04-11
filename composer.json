@@ -25,5 +25,8 @@
         "psr-4": {
             "adrianschubek\\": "src/"
         }
+    },
+    "require-dev": {
+        "symfony/var-dumper": "^5.0"
     }
 }

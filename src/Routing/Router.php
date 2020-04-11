@@ -6,12 +6,11 @@
 
 namespace adrianschubek\Routing;
 
-use Closure;
-
 class Router
 {
     protected array $routes = [];
     protected array $middlewareGroups = [];
+    protected string $subdir = "";
     protected $errorRoute;
 
     public function get(string $routePath, $controller)
@@ -38,14 +37,6 @@ class Router
     public function group(string $name, array $middleware)
     {
         $this->middlewareGroups[$name] = $middleware;
-    }
-
-    public function enableCache()
-    {
-        if (!cfg("cache")) {
-            Logger::error("Cache not enabled in config file.");
-            return;
-        }
     }
 
     public function delete(string $routePath, $controller)
@@ -78,7 +69,8 @@ class Router
     {
         $method = $method ?? $_SERVER['REQUEST_METHOD'];
         $uri = $uri ?? $_SERVER['REQUEST_URI'];
-        $found = false;
+        $uri = str_replace($this->subdir, "", $uri);
+        $found = null;
         $parameterMatches = [];
 
         foreach ($this->routes as $route) {
@@ -86,13 +78,18 @@ class Router
                 continue;
             }
             if (preg_match_all("/" . $route->getRoute() . "$/", $uri, $parameterMatches)) {
-                $found = true;
+                $found = $route;
                 break;
             }
         }
         array_shift($parameterMatches);
 
+        return call_user_func($found->getCallback(), $parameterMatches);
         return var_dump([$method, $uri, $found, $parameterMatches]);
+
+//        if($found) {
+//            return $this->
+//        }
 
         if (!$found) {
             $this->call($this->errorRoute, $parameterMatches);
@@ -103,25 +100,7 @@ class Router
         }
     }
 
-//    private function call($var, $params = [])
-//    {
-//        $paramArr = [];
-//        foreach ($params as $val) {
-//            $paramArr[] = $val[0];
-//        }
-//        if ($var instanceof Closure) {
-//            return $var();
-//        }
-//        if (!is_string($var) || !strpos($var, "@")) {
-////            throw new ControllerNotFound();
-//        }
-//        $ctrl = explode("@", $var);
-////        $response = call($ctrl, $params);
-////        dd($ctrl, $response);
-//        return [$var, $params];
-//    }
-
-    public function route(string $name, array $values = [])
+    public function route(string $name, array $values = []): string
     {
         $url = $this->routes[array_search($name, array_column($this->routes, "name"))]->getStringRoute();
         foreach ($values as $key => $value) {
@@ -133,5 +112,12 @@ class Router
     public function error(callable $callback)
     {
         $this->errorRoute = $callback;
+        return $this;
+    }
+
+    public function setSubdir(string $subdir)
+    {
+        $this->subdir = $subdir;
+        return $this;
     }
 }
