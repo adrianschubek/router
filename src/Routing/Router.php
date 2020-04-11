@@ -15,6 +15,13 @@ class Router
     protected string $subdir = "";
     protected $errorRoute;
 
+    public function __construct()
+    {
+        $this->errorRoute = function () {
+            return "404";
+        };
+    }
+
     public function get(string $routePath, $controller)
     {
         $route = new Route("GET", $routePath, $controller);
@@ -85,6 +92,10 @@ class Router
             }
         }
         array_shift($parameterMatches);
+
+        if ($found === null) {
+            return ($this->errorRoute)();
+        }
 
         return $this->resolve()($found, $parameterMatches);
     }

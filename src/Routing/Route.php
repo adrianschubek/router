@@ -14,6 +14,7 @@ class Route
     protected string $method;
     protected string $route;
     protected string $stringRoute;
+    protected string $customRegex = "([a-zA-Z0-9_-]+)";
     protected $callback;
     protected $middleware = [];
     protected $middlewareGroup = [];
@@ -26,12 +27,20 @@ class Route
         $this->callback = $controller;
     }
 
-    public function regex(string $route): string
+    private function regex(string $route): string
     {
         $str = preg_quote($route, '/');
         $str = str_replace("\]", "]", $str);
         $str = str_replace("/\\", "/", $str);
-        return preg_replace("/\[([a-z]+)]/", "([a-z0-9_-]+)", $str);
+        $str = preg_replace("/\[([a-z]+)]/", $this->customRegex, $str);
+        return $str;
+    }
+
+    public function where(string $regex): self
+    {
+        $this->customRegex = $regex;
+        $this->route = $this->regex($this->stringRoute);
+        return $this;
     }
 
     public function getStringRoute(): string
@@ -75,7 +84,7 @@ class Route
         return $this->middlewareGroup;
     }
 
-    public function middleware($middleware)
+    public function middleware($middleware): self
     {
         if (is_array($middleware)) {
             $this->middleware = $middleware;
@@ -85,7 +94,7 @@ class Route
         return $this;
     }
 
-    public function group($middleware)
+    public function group($middleware): self
     {
         if (is_array($middleware)) {
             $this->middlewareGroup = $middleware;
