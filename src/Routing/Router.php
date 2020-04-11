@@ -13,12 +13,13 @@ class Router
     protected array $routes = [];
     protected array $middlewareGroups = [];
     protected string $subdir = "";
+    protected $resolver;
     protected $errorRoute;
 
     public function __construct()
     {
         $this->errorRoute = function () {
-            return "404";
+            echo "404";
         };
     }
 
@@ -97,18 +98,16 @@ class Router
             return ($this->errorRoute)();
         }
 
-        return $this->resolve()($found, $parameterMatches);
+        return $this->internalResolve($found, $parameterMatches);
     }
 
-    /**
-     * => function(Route $route, array $params)
-     * @return callable
-     */
-    public function resolve(): callable
+    private function internalResolve(Route $route, array $params)
     {
-        return function (Route $route, array $params) {
-            $route->getCallback()(...$this->flatten($params));
-        };
+        $params = [...$this->flatten($params)];
+        if ($this->resolver !== null) {
+            return ($this->resolver)($route, $params);
+        }
+        return $route->getCallback()(...$params);
     }
 
     private function flatten(array $array, float $depth = INF): array
@@ -129,6 +128,17 @@ class Router
         }
 
         return $result;
+    }
+
+    /**
+     * => function(Route $route, array $params)
+     * @param callable $callback
+     * @return Router
+     */
+    public function resolve(callable $callback): self
+    {
+        $this->resolver = $callback;
+        return $this;
     }
 
     public function route(string $name, array $values = []): string

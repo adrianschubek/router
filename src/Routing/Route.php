@@ -9,8 +9,7 @@ namespace adrianschubek\Routing;
 
 class Route
 {
-    public $name;
-
+    public string $name = "";
     protected string $method;
     protected string $route;
     protected string $stringRoute;
