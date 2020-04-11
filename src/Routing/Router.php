@@ -6,6 +6,8 @@
 
 namespace adrianschubek\Routing;
 
+use adrianschubek\Routing\Exceptions\NamedRouteNotFound;
+
 class Router
 {
     protected array $routes = [];
@@ -84,20 +86,38 @@ class Router
         }
         array_shift($parameterMatches);
 
-        return call_user_func($found->getCallback(), $parameterMatches);
-        return var_dump([$method, $uri, $found, $parameterMatches]);
+        return $this->resolve()($found, $parameterMatches);
+    }
 
-//        if($found) {
-//            return $this->
-//        }
+    /**
+     * => function(Route $route, array $params)
+     * @return callable
+     */
+    public function resolve(): callable
+    {
+        return function (Route $route, array $params) {
+            $route->getCallback()(...$this->flatten($params));
+        };
+    }
 
-        if (!$found) {
-            $this->call($this->errorRoute, $parameterMatches);
-//            die("Router: Not Found");
-        } else {
-//            $this->call($route->getController(), $parameterMatches);
-//            die(join(", ", [$method, $uri, $found, $parameterMatches]));
+    private function flatten(array $array, float $depth = INF): array
+    {
+        $result = [];
+        foreach ($array as $item) {
+            if (!is_array($item)) {
+                $result[] = $item;
+            } else {
+                $values = $depth === 1
+                    ? array_values($item)
+                    : $this->flatten($item, $depth - 1);
+
+                foreach ($values as $value) {
+                    $result[] = $value;
+                }
+            }
         }
+
+        return $result;
     }
 
     public function route(string $name, array $values = []): string
@@ -105,6 +125,9 @@ class Router
         $url = $this->routes[array_search($name, array_column($this->routes, "name"))]->getStringRoute();
         foreach ($values as $key => $value) {
             $url = str_replace("[" . $key . "]", $value, $url);
+        }
+        if ($url === null) {
+            throw new NamedRouteNotFound($name);
         }
         return $url;
     }

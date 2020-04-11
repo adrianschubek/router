@@ -15,9 +15,9 @@ interface RouterInterface
 
     function put(string $routePath, $controller);
 
-    function delete(string $routePath, $controller);
-
     function patch(string $routePath, $controller);
+
+    function delete(string $routePath, $controller);
 
     function options(string $routePath, $controller);
 }
